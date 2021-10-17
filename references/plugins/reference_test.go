@@ -20,9 +20,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/oam-dev/kubevela/pkg/utils/common"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/crossplane/crossplane-runtime/pkg/test"
@@ -435,4 +438,36 @@ variable "acl" {
 			}
 		}
 	}
+}
+
+func TestExtractParameter(t *testing.T) {
+	ref := &ConsoleReference{}
+	cueTemplate := `
+parameter: {
+	// +usage=The mapping of environment variables to secret
+	envMappings: [string]: #KeySecret
+}
+#KeySecret: {
+	key?:   string
+	secret: string
+}
+`
+	oldStdout := os.Stdout
+	defer func() {
+		os.Stdout = oldStdout
+	}()
+
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+	cueValue, _ := common.GetCUEParameterValue(cueTemplate)
+	defaultDepth := 0
+	defaultDisplay := "console"
+	displayFormat = &defaultDisplay
+	recurseDepth = &defaultDepth
+	ref.parseParameters(cueValue, "Properties", defaultDepth)
+	assert.Equal(t, 1, len(propertyConsole))
+	propertyConsole[0].TableObject.Render()
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+	assert.True(t, strings.Contains(string(out), "map[string]#KeySecret"))
 }
