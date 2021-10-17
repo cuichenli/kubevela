@@ -20,13 +20,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/oam-dev/kubevela/pkg/utils/common"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/oam-dev/kubevela/pkg/utils/common"
 
 	"github.com/crossplane/crossplane-runtime/pkg/test"
 	"github.com/getkin/kin-openapi/openapi3"
